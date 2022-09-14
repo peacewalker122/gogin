@@ -1,0 +1,32 @@
+func Mainhandler(c *gin.Context) {
+	var data datareq.Userreq
+	err := c.ShouldBindJSON(&data)
+	test1 := []string{}
+	if err != nil {
+		for _, e := range err.(validator.ValidationErrors) {
+			test := fmt.Sprintf("error happen in field %s, due %s", e.Field(), e.ActualTag())
+			test1 = append(test1, test)
+		}
+		c.JSON(http.StatusBadRequest, test1)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data": data,
+	})
+}
+func Getmain(c *gin.Context) {
+	name := c.Param("name")
+	ids := c.Param("id")
+	log.Print(c.Request.URL.Path)
+	id := map[string]interface{}{
+		"name": name,
+		"id":   ids,
+	}
+	tmpl, err := template.ParseFiles(path.Join("ui", "main.html"))
+	if err != nil {
+		log.Print(err)
+		http.Error(c.Writer, "ERROR", http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(c.Writer, id)
+}
